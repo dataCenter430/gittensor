@@ -477,13 +477,22 @@ def is_valid_issue(issue: Issue, pr: PullRequest) -> bool:
             bt.logging.warning(f'Skipping issue #{issue.number} - Issue state not CLOSED (state: {issue.state})')
             return False
 
-        if issue.closed_at and pr.merged_at:
-            days_diff = abs((issue.closed_at - pr.merged_at).total_seconds()) / SECONDS_PER_DAY
-            if days_diff > MAX_ISSUE_CLOSE_WINDOW_DAYS:
-                bt.logging.warning(
-                    f'Skipping issue #{issue.number} - Issue closed {days_diff:.1f}d from merge (max: {MAX_ISSUE_CLOSE_WINDOW_DAYS})'
-                )
-                return False
+        if issue.state_reason and issue.state_reason != 'COMPLETED':
+            bt.logging.warning(
+                f'Skipping issue #{issue.number} - Issue state_reason={issue.state_reason} (not COMPLETED)'
+            )
+            return False
+
+        if not issue.closed_at:
+            bt.logging.warning(f'Skipping issue #{issue.number} - Issue is CLOSED but missing closed_at timestamp')
+            return False
+
+        days_diff = abs((issue.closed_at - pr.merged_at).total_seconds()) / SECONDS_PER_DAY
+        if days_diff > MAX_ISSUE_CLOSE_WINDOW_DAYS:
+            bt.logging.warning(
+                f'Skipping issue #{issue.number} - Issue closed {days_diff:.1f}d from merge (max: {MAX_ISSUE_CLOSE_WINDOW_DAYS})'
+            )
+            return False
 
     return True
 
