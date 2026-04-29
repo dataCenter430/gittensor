@@ -59,6 +59,15 @@ def test_is_test_file_detects_rspec_conventions(filename):
         'app/models/specification.rb',
         'lib/spectrum.rb',
         'config/spec.rb',
+        'openapi/spec/schema.yaml',
+        'docs/spec/rfc001.md',
+        'k8s/spec/deployment.yaml',
+        'api/spec/paths/users.yaml',
+        'api_spec.yaml',
+        'swagger_spec.json',
+        'openapi_spec.yml',
+        'build_spec.toml',
+        'grpc_spec.proto',
     ],
 )
 def test_is_test_file_rejects_non_test_lookalikes(filename):

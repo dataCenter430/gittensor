@@ -82,7 +82,7 @@ class FileChange:
             r'(^|/)__tests?__/',
             r'(^|/)androidtest[a-z]*/',
             r'(^|/)integrationtest/',
-            r'(^|/)spec/',
+            r'(^|/)spec/.*\.rb$',  # Ruby RSpec only; avoids false positives on openapi/spec/, docs/spec/, etc.
         ]
         if any(re.search(pattern, filename_lower) for pattern in test_dir_patterns):
             return True
@@ -92,7 +92,7 @@ class FileChange:
             r'^spec_',
             r'_test\.[^.]+$',
             r'_tests\.[^.]+$',
-            r'_spec\.[^.]+$',
+            r'_spec\.(?!ya?ml|json|toml|xml|graphql|sql|proto|md|txt)[^.]+$',
             r'\.test\.[^.]+$',
             r'\.tests\.[^.]+$',
             r'\.spec\.[^.]+$',
