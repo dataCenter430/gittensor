@@ -377,6 +377,19 @@ class TestOtherGitHubAPIFunctions:
         assert result == '12345'
         assert mock_get.call_count == 3
 
+    @patch('gittensor.utils.github_api_tools.requests.get')
+    @patch('gittensor.utils.github_api_tools.time.sleep')
+    @patch('gittensor.utils.github_api_tools.bt.logging')
+    def test_get_github_id_exponential_backoff(self, mock_logging, mock_sleep, mock_get):
+        """Test that get_github_id uses exponential backoff, not a flat sleep."""
+        mock_get.side_effect = Exception('Timeout')
+
+        get_github_id('fake_token')
+
+        assert mock_get.call_count == 6
+        assert mock_sleep.call_count == 5, 'Should not sleep after the last attempt'
+        mock_sleep.assert_has_calls([call(5), call(10), call(20), call(30), call(30)])
+
 
 # ============================================================================
 # File Changes Retry Logic Tests

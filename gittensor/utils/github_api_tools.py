@@ -235,9 +235,9 @@ def get_github_id(token: str) -> Optional[str]:
         return None
 
     session = get_session(token)
+    max_attempts = 6
 
-    # Retry logic for timeout issues
-    for attempt in range(6):
+    for attempt in range(max_attempts):
         try:
             response = session.get(f'{BASE_GITHUB_API_URL}/user', timeout=GITHUB_HTTP_TIMEOUT_SECONDS)
             if response.status_code == 200:
@@ -251,15 +251,15 @@ def get_github_id(token: str) -> Optional[str]:
                 return str(user_id) if user_id is not None else None
 
             bt.logging.warning(
-                f'GitHub /user request failed with status {response.status_code} (attempt {attempt + 1}/6)'
+                f'GitHub /user request failed with status {response.status_code} (attempt {attempt + 1}/{max_attempts})'
             )
-            if attempt < 5:
-                time.sleep(2)
+            if attempt < max_attempts - 1:
+                time.sleep(min(5 * (2**attempt), 30))
 
         except Exception as e:
-            bt.logging.warning(f'Could not fetch GitHub user (attempt {attempt + 1}/6): {e}')
-            if attempt < 5:  # Don't sleep on last attempt
-                time.sleep(2)
+            bt.logging.warning(f'Could not fetch GitHub user (attempt {attempt + 1}/{max_attempts}): {e}')
+            if attempt < max_attempts - 1:
+                time.sleep(min(5 * (2**attempt), 30))
 
     return None
 
